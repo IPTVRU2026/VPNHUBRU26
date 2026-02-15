@@ -1,1 +1,238 @@
+name: ICEBREAKER
+
+on:
+  schedule:
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install
+      run: pip install telethon qrcode pillow
+        
+    - name: Scan
+      env:
+        API_ID: "38922115"
+        API_HASH: "b34ae241317eff8743f538a8272c5f6d"
+      run: |
+        python3 - <<'PYSCRIPT'
+        import asyncio
+        import re
+        import json
+        import os
+        from datetime import datetime
+        from telethon import TelegramClient
+        
+        async def main():
+            client = TelegramClient('session', int(os.getenv('API_ID')), os.getenv('API_HASH'))
+            await client.connect()
+            
+            configs = set()
+            channels = ['@proxy_list', '@v2ray_configs', '@free_proxy', '@vpn_configs']
+            
+            for ch in channels:
+                try:
+                    entity = await client.get_entity(ch)
+                    messages = await client.get_messages(entity, limit=30)
+                    
+                    for msg in messages:
+                        if msg.text:
+                            patterns = [
+                                r'(vless://[^\s<>]+)',
+                                r'(vmess://[^\s<>]+)',
+                                r'(ss://[^\s<>]+)',
+                                r'(trojan://[^\s<>]+)',
+                                r'(tg://proxy\?[^\s<>]+)'
+                            ]
+                            for pattern in patterns:
+                                configs.update(re.findall(pattern, msg.text, re.IGNORECASE))
+                    
+                    await asyncio.sleep(2)
+                except Exception as e:
+                    print(f"Error with {ch}: {e}")
+            
+            await client.disconnect()
+            
+            tg_proxies = [c for c in configs if 'tg://' in c]
+            vpn_configs = [c for c in configs if c not in tg_proxies]
+            
+            with open('telegram_proxies.txt', 'w') as f:
+                f.write('\n'.join(tg_proxies))
+            
+            with open('vpn_configs.txt', 'w') as f:
+                f.write('\n'.join(vpn_configs))
+            
+            with open('all_configs.txt', 'w') as f:
+                f.write('\n'.join(configs))
+            
+            stats = {
+                'timestamp': datetime.now().isoformat(),
+                'total': len(configs),
+                'telegram': len(tg_proxies),
+                'vpn': len(vpn_configs)
+            }
+            
+            with open('stats.json', 'w') as f:
+                json.dump(stats, f, indent=2)
+            
+            print(f"Found {len(configs)} configs")
+        
+        asyncio.run(main())
+        PYSCRIPT
+        
+    - name: Dashboard
+      run: |
+        python3 - <<'PYSCRIPT'
+        import json
+        import qrcode
+        import base64
+        from io import BytesIO
+        
+        def generate_qr(data):
+            qr = qrcode.QRCode(version=1, box_size=8, border=2)
+            qr.add_data(data)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="#00ff9d", back_color="#0a0c0f")
+            buf = BytesIO()
+            img.save(buf, format="PNG")
+            return f"data:image/png;base64,{base64.b64encode(buf.getvalue()).decode()}"
+        
+        try:
+            with open('stats.json') as f:
+                stats = json.load(f)
+            with open('all_configs.txt') as f:
+                configs = [line.strip() for line in f if line.strip()]
+        except:
+            stats = {'timestamp': '', 'total': 0, 'telegram': 0, 'vpn': 0}
+            configs = []
+        
+        cards_html = ''
+        for i, cfg in enumerate(configs[:12]):
+            cfg_type = 'telegram' if 'tg://' in cfg else 'vpn'
+            qr_code = generate_qr(cfg)
+            short_cfg = cfg[:45] + '...' if len(cfg) > 45 else cfg
+            
+            cards_html += f'''
+            <div class="card" data-type="{cfg_type}">
+              <div class="type">{cfg_type.upper()}</div>
+              <img src="{qr_code}" class="qr">
+              <code>{short_cfg}</code>
+              <button onclick="navigator.clipboard.writeText('{cfg.replace("'", "\\'")}').then(() => alert('Copied!'))">Copy</button>
+            </div>
+            '''
+        
+        html = f'''<!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>ICEBREAKER</title>
+          <style>
+            * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+            body {{ font-family: system-ui; background: #000; color: #fff; padding: 20px; }}
+            .header {{ text-align: center; margin: 40px 0; }}
+            .header h1 {{ font-size: 3em; color: #0f0; }}
+            .stats {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; margin: 30px 0; }}
+            .stat {{ background: #111; padding: 20px; border-radius: 10px; text-align: center; }}
+            .stat-value {{ font-size: 2em; color: #0f0; }}
+            .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }}
+            .card {{ background: #111; padding: 15px; border-radius: 10px; }}
+            .type {{ display: inline-block; padding: 5px 10px; background: rgba(0,255,0,0.2); border-radius: 5px; color: #0f0; font-size: 0.8em; }}
+            .qr {{ width: 100px; display: block; margin: 10px auto; }}
+            code {{ display: block; background: #000; padding: 8px; border-radius: 5px; font-size: 0.7em; word-break: break-all; margin: 10px 0; }}
+            button {{ width: 100%; padding: 10px; background: #0f0; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }}
+            button:hover {{ opacity: 0.8; }}
+            .sub {{ margin-top: 40px; background: #111; padding: 20px; border-radius: 10px; }}
+            .sub h3 {{ color: #0f0; margin-bottom: 10px; }}
+            .sub code {{ background: #000; }}
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>🧊 ICEBREAKER</h1>
+            <p>Free Internet Station</p>
+          </div>
+          
+          <div class="stats">
+            <div class="stat">
+              <div class="stat-value">{stats['total']}</div>
+              <div>Total Configs</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">{stats['telegram']}</div>
+              <div>Telegram</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">{stats['vpn']}</div>
+              <div>VPN</div>
+            </div>
+          </div>
+          
+          <h2 style="margin: 30px 0; color: #0f0;">Available Configs</h2>
+          <div class="grid">
+            {cards_html}
+          </div>
+          
+          <div class="sub">
+            <h3>📡 Subscription URLs</h3>
+            <p>Telegram: <code>https://raw.githubusercontent.com/${{{{ github.repository }}}}/main/telegram_proxies.txt</code></p>
+            <p>VPN: <code>https://raw.githubusercontent.com/${{{{ github.repository }}}}/main/vpn_configs.txt</code></p>
+            <p>All: <code>https://raw.githubusercontent.com/${{{{ github.repository }}}}/main/all_configs.txt</code></p>
+          </div>
+        </body>
+        </html>'''
+        
+        with open('index.html', 'w') as f:
+            f.write(html)
+        
+        print("Dashboard created")
+        PYSCRIPT
+        
+    - name: Release
+      run: |
+        TAG="v$(date +%s)"
+        TOTAL=$(wc -l < all_configs.txt || echo 0)
+        TG=$(wc -l < telegram_proxies.txt || echo 0)
+        VPN=$(wc -l < vpn_configs.txt || echo 0)
+        
+        NOTES="Update $(date '+%Y-%m-%d %H:%M')
+        
+        Total: $TOTAL
+        Telegram: $TG
+        VPN: $VPN"
+        
+        gh release create "$TAG" \
+          --title "Update $(date '+%Y-%m-%d %H:%M')" \
+          --notes "$NOTES" \
+          telegram_proxies.txt \
+          vpn_configs.txt \
+          all_configs.txt \
+          stats.json || echo "Release creation completed"
+      env:
+        GH_TOKEN: ${{ github.token }}
+        
+    - name: Deploy
+      run: |
+        git config user.name "ICEBREAKER Bot"
+        git config user.email "bot@github.com"
+        
+        mkdir -p docs
+        cp index.html docs/
+        
+        git add -A
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update $(date +%s)"
+        git push || echo "Push completed"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
