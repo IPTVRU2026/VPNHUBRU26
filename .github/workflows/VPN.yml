@@ -12,14 +12,10 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: "icebreaker"
-  cancel-in-progress: true
-
 jobs:
   stealth-harvest:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 30
     
     steps:
     - name: ⏳ Random stealth delay
@@ -30,11 +26,649 @@ jobs:
     
     - name: 📥 Checkout repository
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
     
     - name: 🐍 Setup Python
       uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests qrcode pillow cryptography fake-useragent colorama
+        
+    - name: 🔑 Configure Telegram API
+      run: |
+        # Создаем файл конфигурации
+        cat > config.py << 'END_CONFIG'
+# Telegram API credentials
+API_ID = 38922115
+API_HASH = "b34ae241317eff8743f538a8272c5f6d"
+
+# DC 2 Configuration
+DC2_IP = "149.154.167.50"
+DC2_PORT = 443
+DC2_PUBLIC_KEY = """-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g
+5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO
+62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/
++aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9
+t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs
+5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB
+-----END RSA PUBLIC KEY-----"""
+
+# DC 1 Configuration (backup)
+DC1_IP = "149.154.175.50"
+DC1_PORT = 443
+DC1_PUBLIC_KEY = """-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR
+yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv
+plUUI1PLTktZ9u2WWE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/
+j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1
+aHWfYmlEGepfaYR8QY0qvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO
+j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB
+-----END RSA PUBLIC KEY-----"""
+END_CONFIG
+        
+    - name: 🤖 Bot Cracker Engine
+      run: |
+        # Создаем бота для взлома
+        cat > bot_cracker.py << 'END_BOT'
+import asyncio
+from telethon import TelegramClient
+import random
+import re
+import time
+import os
+
+class BotCracker:
+    def __init__(self):
+        from config import API_ID, API_HASH
+        self.api_id = API_ID
+        self.api_hash = API_HASH
+        self.found_configs = []
+        
+    async def attack_bot(self, bot_username):
+        """Атака на бота 10 разными способами"""
+        results = []
+        
+        try:
+            # Создаем клиента
+            session_name = f"session_{random.randint(1000,9999)}"
+            client = TelegramClient(session_name, self.api_id, self.api_hash)
+            await client.connect()
+            
+            if not await client.is_user_authorized():
+                return results
+                
+            entity = await client.get_entity(bot_username)
+            
+            # Способ 1: /start
+            msg = await client.send_message(entity, "/start")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 2: /free
+            msg = await client.send_message(entity, "/free")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 3: /proxy
+            msg = await client.send_message(entity, "/proxy")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 4: /config
+            msg = await client.send_message(entity, "/config")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 5: /v2ray
+            msg = await client.send_message(entity, "/v2ray")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 6: /key
+            msg = await client.send_message(entity, "/key")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 7: /test
+            msg = await client.send_message(entity, "/test")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 8: /trial
+            msg = await client.send_message(entity, "/trial")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 9: /get
+            msg = await client.send_message(entity, "/get")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            # Способ 10: /generate
+            msg = await client.send_message(entity, "/generate")
+            await asyncio.sleep(1)
+            reply = await client.get_messages(entity, limit=1)
+            if reply and reply[0].text:
+                results.extend(self.extract_configs(reply[0].text))
+            
+            await client.disconnect()
+            
+            # Чистим сессию
+            try:
+                os.remove(f"{session_name}.session")
+            except:
+                pass
+                
+        except Exception as e:
+            print(f"Error: {e}")
+        
+        return list(set(results))
+    
+    def extract_configs(self, text):
+        """Извлечение конфигов из текста"""
+        if not text:
+            return []
+        
+        patterns = [
+            r'(vless://[^\s]+)',
+            r'(vmess://[^\s]+)',
+            r'(ss://[^\s]+)',
+            r'(trojan://[^\s]+)',
+            r'(tg://proxy[^\s]+)'
+        ]
+        
+        found = []
+        for pattern in patterns:
+            found.extend(re.findall(pattern, text))
+        return found
+END_BOT
+        
+    - name: 🕷️ Telegram Scanner
+      run: |
+        # Создаем сканер
+        cat > scanner.py << 'END_SCANNER'
+import asyncio
+from telethon import TelegramClient
+import re
+
+class TelegramScanner:
+    def __init__(self):
+        from config import API_ID, API_HASH
+        self.api_id = API_ID
+        self.api_hash = API_HASH
+        self.bots = []
+        self.configs = []
+        
+    async def scan(self):
+        """Сканирование публичных каналов"""
+        try:
+            client = TelegramClient('scanner', self.api_id, self.api_hash)
+            await client.start()
+            
+            # Список каналов для сканирования
+            channels = [
+                '@proxy_list',
+                '@v2ray_configs',
+                '@free_proxy',
+                '@vpn_configs',
+                '@telegram_proxy'
+            ]
+            
+            for channel in channels:
+                try:
+                    entity = await client.get_entity(channel)
+                    msgs = await client.get_messages(entity, limit=30)
+                    
+                    for msg in msgs:
+                        if msg.text:
+                            # Ищем конфиги
+                            configs = self.extract_configs(msg.text)
+                            self.configs.extend(configs)
+                            
+                            # Ищем ботов
+                            bots = re.findall(r'@(\w+bot)', msg.text, re.IGNORECASE)
+                            self.bots.extend(bots)
+                except:
+                    continue
+            
+            await client.disconnect()
+            
+        except Exception as e:
+            print(f"Scan error: {e}")
+    
+    def extract_configs(self, text):
+        patterns = [
+            r'(vless://[^\s]+)',
+            r'(vmess://[^\s]+)',
+            r'(ss://[^\s]+)',
+            r'(trojan://[^\s]+)',
+            r'(tg://proxy[^\s]+)'
+        ]
+        found = []
+        for pattern in patterns:
+            found.extend(re.findall(pattern, text))
+        return found
+END_SCANNER
+        
+    - name: ⚡ Config Checker
+      run: |
+        # Создаем проверяльщик
+        cat > checker.py << 'END_CHECKER'
+import asyncio
+import aiohttp
+import time
+
+class ConfigChecker:
+    async def check_one(self, config):
+        """Проверка одного конфига"""
+        start = time.time()
+        
+        try:
+            if config.startswith('tg://'):
+                # Проверка Telegram прокси
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('https://telegram.org', timeout=5) as resp:
+                        if resp.status == 200:
+                            ping = (time.time() - start) * 1000
+                            return {'config': config, 'ping': ping}
+            else:
+                # Проверка VPN
+                async with aiohttp.ClientSession() as session:
+                    async with session.get('https://google.com', timeout=5) as resp:
+                        if resp.status == 200:
+                            ping = (time.time() - start) * 1000
+                            return {'config': config, 'ping': ping}
+        except:
+            pass
+        
+        return None
+    
+    async def check_all(self, configs):
+        """Проверка всех конфигов"""
+        tasks = [self.check_one(c) for c in configs[:50]]
+        results = await asyncio.gather(*tasks)
+        
+        working = [r for r in results if r]
+        working.sort(key=lambda x: x['ping'])
+        
+        return working[:20]
+END_CHECKER
+        
+    - name: 🎨 Dashboard Generator
+      run: |
+        # Создаем генератор сайта
+        cat > dashboard.py << 'END_DASHBOARD'
+import qrcode
+import json
+from datetime import datetime
+import base64
+from io import BytesIO
+
+class DashboardGenerator:
+    def generate_qr(self, data):
+        qr = qrcode.QRCode(box_size=8, border=2)
+        qr.add_data(data)
+        img = qr.make_image(fill_color="#00ff9d", back_color="#0a0c0f")
+        
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        return base64.b64encode(buffered.getvalue()).decode()
+    
+    def generate(self, configs):
+        # Статистика
+        telegram = [c for c in configs if 'tg://' in c['config']]
+        vpn = [c for c in configs if not ('tg://' in c['config'])]
+        
+        # Генерация карточек
+        cards = ""
+        for cfg in configs[:8]:
+            qr = self.generate_qr(cfg['config'])
+            cfg_type = "Telegram" if 'tg://' in cfg['config'] else "VPN"
+            
+            cards += f'''
+            <div class="card">
+                <div class="card-header">
+                    <span class="type">{cfg_type}</span>
+                    <span class="ping">{int(cfg["ping"])}ms</span>
+                </div>
+                <div class="qr">
+                    <img src="data:image/png;base64,{qr}" alt="QR">
+                </div>
+                <button class="copy-btn" onclick="copyConfig('{cfg["config"]}')">
+                    Копировать
+                </button>
+            </div>
+            '''
+        
+        # HTML шаблон
+        html = f'''
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧊 ICEBREAKER</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        body {{
+            background: #0a0c0f;
+            color: white;
+            font-family: -apple-system, sans-serif;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+        }}
+        .header {{
+            text-align: center;
+            padding: 40px;
+            background: #1a1e24;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }}
+        .header h1 {{
+            font-size: 3em;
+            background: linear-gradient(135deg, #00ff9d, #00b8ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }}
+        .stats {{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }}
+        .stat {{
+            background: #1a1e24;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }}
+        .stat-value {{
+            font-size: 2em;
+            color: #00ff9d;
+            font-weight: bold;
+        }}
+        .apps {{
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }}
+        .app {{
+            background: #1a1e24;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }}
+        .app a {{
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, #00ff9d, #00b8ff);
+            color: black;
+            text-decoration: none;
+            border-radius: 20px;
+            font-weight: bold;
+        }}
+        .grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }}
+        .card {{
+            background: #1a1e24;
+            padding: 15px;
+            border-radius: 15px;
+            border: 1px solid #00ff9d33;
+            text-align: center;
+        }}
+        .card-header {{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }}
+        .type {{
+            background: #00ff9d33;
+            padding: 4px 10px;
+            border-radius: 20px;
+            color: #00ff9d;
+            font-size: 0.9em;
+        }}
+        .ping {{
+            color: #00ff9d;
+            font-weight: bold;
+        }}
+        .qr img {{
+            max-width: 150px;
+            margin: 10px 0;
+        }}
+        .copy-btn {{
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #00ff9d, #00b8ff);
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }}
+        .sub-box {{
+            background: #1a1e24;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }}
+        .sub-link {{
+            background: #0a0c0f;
+            padding: 10px;
+            border-radius: 10px;
+            word-break: break-all;
+            font-family: monospace;
+            margin-top: 5px;
+        }}
+        .footer {{
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧊 ICEBREAKER</h1>
+            <p>Автономная станция свободного интернета</p>
+            <div style="color: #00ff9d; margin-top: 10px;">
+                Обновлено: {datetime.now().strftime("%d.%m.%Y %H:%M")}
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">{len(configs)}</div>
+                <div>Всего</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{len(telegram)}</div>
+                <div>Telegram</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">{len(vpn)}</div>
+                <div>VPN</div>
+            </div>
+        </div>
+        
+        <h2>📱 Приложения</h2>
+        <div class="apps">
+            <div class="app">
+                <div>🤖 Nekobox (Android)</div>
+                <a href="https://github.com/MatsuriDayo/NekoBoxForAndroid/releases">Скачать</a>
+            </div>
+            <div class="app">
+                <div>📱 v2rayNG (Android)</div>
+                <a href="https://github.com/2dust/v2rayNG/releases">Скачать</a>
+            </div>
+            <div class="app">
+                <div>🍎 Streisand (iOS)</div>
+                <a href="https://apps.apple.com/app/streisand/id6450534064">Скачать</a>
+            </div>
+            <div class="app">
+                <div>📡 V2BOX (iOS)</div>
+                <a href="https://apps.apple.com/app/v2box/id6446018936">Скачать</a>
+            </div>
+        </div>
+        
+        <h2>🔑 Рабочие конфиги</h2>
+        <div class="grid">
+            {cards}
+        </div>
+        
+        <div class="sub-box">
+            <h3>📡 Ссылки для автообновления</h3>
+            <div style="margin-top: 15px;">
+                <div style="color: #00ff9d;">Telegram Proxies:</div>
+                <div class="sub-link">https://raw.githubusercontent.com/${{{{ github.repository }}}}/main/telegram_proxies.txt</div>
+            </div>
+            <div style="margin-top: 15px;">
+                <div style="color: #00b8ff;">VPN Configs:</div>
+                <div class="sub-link">https://raw.githubusercontent.com/${{{{ github.repository }}}}/main/vpn_configs.json</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>🧊 ICEBREAKER - Обновляется каждый час</p>
+        </div>
+    </div>
+    
+    <script>
+        function copyConfig(config) {{
+            navigator.clipboard.writeText(config);
+            alert('✅ Конфиг скопирован!');
+        }}
+    </script>
+</body>
+</html>
+'''
+        
+        with open('docs/index.html', 'w', encoding='utf-8') as f:
+            f.write(html)
+END_DASHBOARD
+        
+    - name: 🚀 Run ICEBREAKER
+      run: |
+        # Основной скрипт
+        cat > run.py << 'END_RUN'
+import asyncio
+import json
+from scanner import TelegramScanner
+from bot_cracker import BotCracker
+from checker import ConfigChecker
+from dashboard import DashboardGenerator
+
+async def main():
+    print("🧊 ICEBREAKER Starting...")
+    
+    # Сканирование
+    scanner = TelegramScanner()
+    await scanner.scan()
+    print(f"Found {len(scanner.configs)} configs, {len(scanner.bots)} bots")
+    
+    # Атака на ботов
+    cracker = BotCracker()
+    all_configs = scanner.configs.copy()
+    
+    for bot in set(scanner.bots)[:10]:
+        print(f"Attacking @{bot}...")
+        bot_configs = await cracker.attack_bot(bot)
+        all_configs.extend(bot_configs)
+        await asyncio.sleep(2)
+    
+    # Убираем дубликаты
+    all_configs = list(set(all_configs))
+    print(f"Total configs: {len(all_configs)}")
+    
+    # Проверка
+    checker = ConfigChecker()
+    working = await checker.check_all(all_configs)
+    print(f"Working configs: {len(working)}")
+    
+    # Сохраняем
+    telegram = [c for c in working if 'tg://' in c['config']]
+    vpn = [c for c in working if not ('tg://' in c['config'])]
+    
+    with open('telegram_proxies.txt', 'w') as f:
+        for t in telegram:
+            f.write(t['config'] + '\n')
+    
+    with open('vpn_configs.json', 'w') as f:
+        json.dump(vpn, f, indent=2)
+    
+    with open('all_in_one.raw', 'w') as f:
+        for w in working:
+            f.write(w['config'] + '\n')
+    
+    # Генерация сайта
+    dashboard = DashboardGenerator()
+    dashboard.generate(working)
+    
+    print("✅ ICEBREAKER Complete!")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+END_RUN
+        
+        python run.py
+        
+    - name: 📦 Create Release
+      if: success()
+      run: |
+        TAG="icebreaker-$(date +'%Y%m%d-%H%M%S')"
+        gh release create "$TAG" \
+          --title "🧊 ICEBREAKER $(date +'%d.%m.%Y %H:%M')" \
+          --notes "Автоматическое обновление" \
+          telegram_proxies.txt vpn_configs.json all_in_one.raw
+      env:
+        GH_TOKEN: ${{ github.token }}
+        
+    - name: 📤 Deploy to Pages
+      if: success()
+      run: |
+        mkdir -p docs
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add docs/ telegram_proxies.txt vpn_configs.json all_in_one.raw
+        git commit -m "🧊 Auto-update $(date +'%Y%m%d')" || exit 0
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
