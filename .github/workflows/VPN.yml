@@ -1,40 +1,220 @@
-name: 🧊 ICEBREAKER - Ultimate Stealth Aggregator & Auto-Publisher
+name: ICEBREAKER — Global Stealth Aggregator & Auto-Publisher
 
 on:
   schedule:
-    - cron: '0 * * * *'
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+    - cron: '0 * * * *' # Каждый час
+  workflow_dispatch: # Ручное запуск
 
 env:
-  TG_API_ID: "38922115"
-  TG_API_HASH: "b34ae241317eff8743f538a8272c5f6d"
+  TELEGRAM_API_ID: 38922115
+  TELEGRAM_API_HASH: b34ae241317eff8743f538a8272c5f6d
+  DC_ID: 2
+  DC_IP: 149.154.167.50
+  DC_PORT: 443
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  icebreaker:
+  stealth_aggregator:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pages: write
-      id-token: write
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python 3.11
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.10'
 
       - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests lxml qrcode[pil] pillow cryptography
+          pip install telethon requests qrcode[pil] beautifulsoup4 pyyaml
 
-      - name: Prepare Directories
+      - name: Aggressive Infiltration (Telegram Bots, Gists, Pastebin, Reddit)
         run: |
+          python3 - << 'EOF'
+          import os
+          import re
+          import json
+          import requests
+          from telethon.sync import TelegramClient
+          from telethon.tl.functions.messages import GetDialogsRequest
+          from telethon.tl.types import InputPeerEmpty
+          from bs4 import BeautifulSoup
+          import qrcode
+          import yaml
+
+          # --- 1. Telegram Bots Infiltration ---
+          def scrape_telegram_bots():
+              client = TelegramClient('anon', env.TELEGRAM_API_ID, env.TELEGRAM_API_HASH)
+              client.start()
+              dials = client(GetDialogsRequest(offset_date=None, offset_id=0, offset_peer=InputPeerEmpty(), limit=200, hash=0))
+              bot_links = []
+              for chat in dials.chats:
+                  if hasattr(chat, 'username') and 'bot' in chat.username.lower():
+                      bot_links.append(f"https://t.me/{chat.username}")
+              client.disconnect()
+              return bot_links
+
+          # --- 2. GitHub Gists, Pastebin, Reddit Crawler ---
+          def crawl_external_sources():
+              sources = {
+                  "gists": "https://api.github.com/gists/public",
+                  "pastebin": "https://pastebin.com/archive",
+                  "reddit": "https://www.reddit.com/r/proxy/search.json?q=flair%3Aconfig&sort=new"
+              }
+              configs = []
+              for name, url in sources.items():
+                  try:
+                      r = requests.get(url, timeout=10)
+                      if name == "gists":
+                          data = r.json()
+                          for gist in data:
+                              for file in gist['files'].values():
+                                  if re.search(r'(vless|vmess|ss|trojan|tg://proxy)', file['content'], re.I):
+                                      configs.append(file['content'])
+                      elif name == "pastebin":
+                          soup = BeautifulSoup(r.text, 'html.parser')
+                          for link in soup.find_all('a', href=re.compile(r'/raw/')):
+                              raw = requests.get(f"https://pastebin.com{link['href']}").text
+                              if re.search(r'(vless|vmess|ss|trojan|tg://proxy)', raw, re.I):
+                                  configs.append(raw)
+                      elif name == "reddit":
+                          data = r.json()
+                          for post in data['data']['children']:
+                              if re.search(r'(vless|vmess|ss|trojan|tg://proxy)', post['data']['selftext'], re.I):
+                                  configs.append(post['data']['selftext'])
+                  except Exception as e:
+                      print(f"Error crawling {name}: {e}")
+              return configs
+
+          # --- 3. Universal Parser ---
+          def parse_configs(raw_configs):
+              parsed = {"telegram": [], "vpn": []}
+              for config in raw_configs:
+                  if re.search(r'tg://proxy|MTProto|Socks5', config, re.I):
+                      parsed["telegram"].append(config)
+                  elif re.search(r'vless|vmess|ss|trojan', config, re.I):
+                      parsed["vpn"].append(config)
+              return parsed
+
+          # --- 4. Live Check (Speed/Ping) ---
+          def check_configs(configs):
+              # TODO: Implement real speed/ping check (e.g. using subprocess + curl)
+              return configs  # Placeholder
+
+          # --- 5. Generate QR Codes ---
+          def generate_qr(config, filename):
+              qr = qrcode.QRCode(version=1, box_size=10, border=5)
+              qr.add_data(config)
+              qr.make(fit=True)
+              img = qr.make_image(fill_color="black", back_color="white")
+              img.save(filename)
+
+          # --- 6. Generate GitHub Pages Site ---
+          def generate_site(telegram_configs, vpn_configs):
+              os.makedirs("site", exist_ok=True)
+              with open("site/index.html", "w") as f:
+                  f.write("""
+                  <!DOCTYPE html>
+                  <html lang="ru">
+                  <head>
+                      <meta charset="UTF-8">
+                      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                      <title>ICEBREAKER — Свежие конфиги</title>
+                      <style>
+                          body { background: #121212; color: #e0e0e0; font-family: Arial, sans-serif; }
+                          .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+                          .card { background: #1e1e1e; border-radius: 8px; padding: 15px; margin: 10px 0; }
+                          .qr { margin: 10px; }
+                          button { background: #4CAF50; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+                          a { color: #2196F3; }
+                      </style>
+                  </head>
+                  <body>
+                      <div class="container">
+                          <h1>🌍 ICEBREAKER — Свежие конфиги</h1>
+                          <div class="card">
+                              <h2>📱 Telegram Proxy (MTProto/Socks5)</h2>
+                              {% for config in telegram_configs %}
+                              <div>
+                                  <pre>{{config}}</pre>
+                                  <img class="qr" src="qr/telegram_{{loop.index}}.png" width="150">
+                                  <button onclick="navigator.clipboard.writeText('{{config}}')">Copy</button>
+                              </div>
+                              {% endfor %}
+                          </div>
+                          <div class="card">
+                              <h2>🔒 VPN (VLESS/VMESS/Shadowsocks/Trojan)</h2>
+                              {% for config in vpn_configs %}
+                              <div>
+                                  <pre>{{config}}</pre>
+                                  <img class="qr" src="qr/vpn_{{loop.index}}.png" width="150">
+                                  <button onclick="navigator.clipboard.writeText('{{config}}')">Copy</button>
+                              </div>
+                              {% endfor %}
+                          </div>
+                          <div class="card">
+                              <h2>📱 Приложения</h2>
+                              <p><a href="https://github.com/MatsuriDayo/nekoray">Nekobox (Android/Windows)</a></p>
+                              <p><a href="https://apps.apple.com/us/app/v2box-v2ray-utility/id6446693134">V2BOX (iOS)</a></p>
+                          </div>
+                          <div class="card">
+                              <h2>📖 Инструкция</h2>
+                              <p>1. Выберите конфиг.</p>
+                              <p>2. Отсканируйте QR или скопируйте ссылку.</p>
+                              <p>3. Вставьте в приложение.</p>
+                          </div>
+                      </div>
+                  </body>
+                  </html>
+                  """.replace("{% for config in telegram_configs %}", "".join(f"<div><pre>{c}</pre><img class='qr' src='qr/telegram_{i}.png' width='150'><button onclick='navigator.clipboard.writeText(`{c}`)'>Copy</button></div>" for i, c in enumerate(telegram_configs)))
+                   .replace("{% for config in vpn_configs %}", "".join(f"<div><pre>{c}</pre><img class='qr' src='qr/vpn_{i}.png' width='150'><button onclick='navigator.clipboard.writeText(`{c}`)'>Copy</button></div>" for i, c in enumerate(vpn_configs))))
+
+          # --- MAIN ---
+          if __name__ == "__main__":
+              os.makedirs("qr", exist_ok=True)
+              os.makedirs("output", exist_ok=True)
+
+              # 1. Scrape
+              bot_links = scrape_telegram_bots()
+              raw_configs = crawl_external_sources()
+
+              # 2. Parse & Check
+              parsed = parse_configs(raw_configs)
+              telegram_configs = check_configs(parsed["telegram"])
+              vpn_configs = check_configs(parsed["vpn"])
+
+              # 3. Generate QR
+              for i, config in enumerate(telegram_configs):
+                  generate_qr(config, f"qr/telegram_{i}.png")
+              for i, config in enumerate(vpn_configs):
+                  generate_qr(config, f"qr/vpn_{i}.png")
+
+              # 4. Generate Site
+              generate_site(telegram_configs, vpn_configs)
+
+              # 5. Save to Files
+              with open("output/telegram_proxies.txt", "w") as f:
+                  f.write("\n\n".join(telegram_configs))
+              with open("output/vpn_configs.json", "w") as f:
+                  json.dump(vpn_configs, f, indent=2)
+              with open("output/all_in_one.raw", "w") as f:
+                  f.write("\n\n".join(telegram_configs + vpn_configs))
+
+              # 6. Create Release
+              os.system("git config --global user.name 'ICEBREAKER'")
+              os.system("git config --global user.email 'icebreaker@noreply.github.com'")
+              os.system("git add .")
+              os.system("git commit -m 'Update configs'")
+              os.system("git push")
+              os.system("gh release create $(date +%Y-%m-%d) --title 'Update $(date +%d-%m-%Y)' --notes 'Auto-update' output/*")
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site        run: |
           mkdir -p output/{telegram,vpn,simple_proxy,raw,qr} logs sessions site scripts manage
 
       - name: Create All Scripts
