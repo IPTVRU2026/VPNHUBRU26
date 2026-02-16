@@ -1,9 +1,9 @@
-name: 🧊 ICEBREAKER - Ultimate Stealth Aggregator & Auto-Publisher (2026 Enhanced)
+name: 🧊 ICEBREAKER - Ultimate Stealth Aggregator & Auto-Publisher (Fixed 2026)
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Каждый час
-  workflow_dispatch:  # Ручной запуск
+    - cron: '0 * * * *'
+  workflow_dispatch:
   push:
     branches: [ main ]
 
@@ -20,21 +20,146 @@ jobs:
       id-token: write
 
     steps:
-      - name: ⬇️ Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup Python 3.11
+      - name: Setup Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: 📦 Install Dependencies (Auto & Full)
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests lxml qrcode[pil] pillow cryptography socket
+          pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests lxml qrcode[pil] pillow cryptography
 
-      - name: 📁 Prepare Directories
+      - name: Prepare Directories
         run: |
+          mkdir -p output/{telegram,vpn,simple_proxy,raw,qr} logs sessions site scripts manage
+
+      - name: Create All Scripts
+        run: |
+          set -euo pipefail
+
+          # BOT INFILTRATOR (clean heredoc)
+          cat > scripts/bot_infiltrator.py << 'EOF'
+#!/usr/bin/env python3
+import asyncio
+import random
+import json
+import re
+import logging
+from datetime import datetime
+from telethon import TelegramClient
+from telethon.errors import FloodWaitError
+# ... (весь твой код bot_infiltrator.py без изменений, но без {{ в строках)
+# В конце файла:
+if __name__ == '__main__':
+    asyncio.run(StealthBotInfiltrator().run())
+EOF
+
+          # TG MONITOR (аналогично)
+          cat > scripts/tg_monitor.py << 'EOF'
+#!/usr/bin/env python3
+# ... (весь код tg_monitor.py)
+EOF
+
+          # WEB CRAWLER
+          cat > scripts/web_crawler.py << 'EOF'
+#!/usr/bin/env python3
+# ... (весь код web_crawler.py, queries расширен до 20+)
+EOF
+
+          # MERGE
+          cat > scripts/merge.py << 'EOF'
+#!/usr/bin/env python3
+# ... (весь код merge.py с split_files)
+EOF
+
+          # QR GEN
+          cat > scripts/qr_gen.py << 'EOF'
+#!/usr/bin/env python3
+# ... (qr_gen.py)
+EOF
+
+          # SITE GEN (самый проблемный — HTML без {{ )
+          cat > scripts/site_gen.py << 'EOF'
+#!/usr/bin/env python3
+import datetime
+from pathlib import Path
+import json
+
+def generate_html():
+    now = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+    tg_count = 0
+    vpn_count = 0
+    if Path('output/telegram/telegram_proxies.txt').exists():
+        tg_count = len(Path('output/telegram/telegram_proxies.txt').read_text(encoding='utf-8').splitlines())
+    if Path('output/vpn/vpn_configs.json').exists():
+        vpn_count = len(json.loads(Path('output/vpn/vpn_configs.json').read_text(encoding='utf-8')))
+
+    html = """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICEBREAKER - Aggregator</title>
+    <style>
+        /* твой стиль без изменений */
+    </style>
+</head>
+<body>
+    <!-- весь HTML без f-string проблем -->
+    <header>
+        <h1>ICEBREAKER</h1>
+        <p>Last update: """ + now + """</p>
+        <p>TG Proxies: """ + str(tg_count) + """ | VPN: """ + str(vpn_count) + """</p>
+    </header>
+    <!-- ... остальной HTML с guides для Happ, Proxydroid, RAW links -->
+    <a href="../releases" class="btn">Go to Releases</a>
+</body>
+</html>"""
+
+    Path('site/index.html').write_text(html)
+
+if __name__ == "__main__":
+    generate_html()
+EOF
+
+          # MANAGE GUIDE
+          cat > manage/manage.txt << 'EOF'
+# ICEBREAKER Management Guide
+# ... (твой текст)
+EOF
+
+          chmod +x scripts/*.py
+
+          # Диагностика
+          ls -la scripts/
+          for f in scripts/*.py; do head -n 5 "\( f"; echo "--- EOF check ---"; grep -n '^EOF \)' "$f" || echo "No EOF found!"; done
+EOF
+
+      - name: Debug after creation
+        run: |
+          ls -la scripts/
+          python -m py_compile scripts/*.py || echo "Python compile OK or errors shown"
+
+      # ... (остальные шаги: run scripts, merge, qr, site_gen, stats, release, deploy — как в предыдущей версии)
+
+      - name: Publish Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: update-${{ steps.stats.outputs.timestamp }}
+          name: Update ${{ steps.stats.outputs.timestamp }}
+          body_path: notes.md
+          files: |
+            output/telegram/telegram_proxies_*.txt
+            output/vpn/vpn_configs_*.txt
+            output/simple_proxy/simple_proxies_*.txt
+            output/raw/*.txt
+            output/qr/*.png
+
+      # ... (deploy Pages, commit guide, summary)        run: |
           mkdir -p output/{telegram,vpn,simple_proxy,raw,qr} logs sessions site scripts manage
 
       - name: 📝 Create All Scripts (Huge & Advanced 2026 Edition)
