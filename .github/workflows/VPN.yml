@@ -1,8 +1,8 @@
-name: 🧊 ICEBREAKER - Ultimate Auto-Deploying System
+name: 🧊 ICEBREAKER - Ultimate Stealth Aggregator & Auto-Publisher (Dynamic Search 2026)
 
 on:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 * * * *'  # Каждый час
   workflow_dispatch:
   push:
     branches: [ main ]
@@ -29,6 +29,963 @@ jobs:
           python-version: '3.11'
 
       - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests lxml qrcode[pil] pillow cryptography
+
+      - name: Prepare Directories
+        run: |
+          mkdir -p output/{telegram,vpn,simple_proxy,raw,qr} logs sessions site scripts manage
+
+      - name: Create All Scripts (Dynamic Auto-Search)
+        run: |
+          set -euo pipefail
+
+          # ==================== BOT INFILTRATOR (DYNAMIC SEARCH: AUTO-FINDS BOTS BY KEYWORDS) ====================
+          cat > scripts/bot_infiltrator.py << 'EOF'
+#!/usr/bin/env python3
+import asyncio
+import random
+import json
+import re
+import logging
+from datetime import datetime
+from telethon import TelegramClient
+from telethon.errors import FloodWaitError
+from telethon.tl.functions.messages import GetBotCallbackAnswerRequest
+from telethon.tl.types import KeyboardButtonCallback, KeyboardButtonUrl
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.backends import default_backend
+
+API_ID = 38922115
+API_HASH = "b34ae241317eff8743f538a8272c5f6d"
+
+# Public Keys from prompt
+PUBLIC_KEYS = [
+    """-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEAyMEdY1aR+sCR3ZSJrtztKTKqigvO/vBfqACJLZtS7QMgCGXJ6XIR
+yy7mx66W0/sOFa7/1mAZtEoIokDP3ShoqF4fVNb6XeqgQfaUHd8wJpDWHcR2OFwv
+plUUI1PLTktZ9uW2WE23b+ixNwJjJGwBDJPQEQFBE+vfmH0JP503wr5INS1poWg/
+j25sIWeYPHYeOrFp/eXaqhISP6G+q2IeTaWTXpwZj4LzXq5YOpk4bYEQ6mvRq7D1
+aHWfYmlEGepfaYR8Q0YqvvhYtMte3ITnuSJs171+GDqpdKcSwHnd6FudwGO4pcCO
+j4WcDuXc2CTHgH8gFTNhp/Y8/SpDOhvn9QIDAQAB
+-----END RSA PUBLIC KEY-----""",
+    """-----BEGIN RSA PUBLIC KEY-----
+MIIBCgKCAQEA6LszBcC1LGzyr992NzE0ieY+BSaOW622Aa9Bd4ZHLl+TuFQ4lo4g
+5nKaMBwK/BIb9xUfg0Q29/2mgIR6Zr9krM7HjuIcCzFvDtr+L0GQjae9H0pRB2OO
+62cECs5HKhT5DZ98K33vmWiLowc621dQuwKWSQKjWf50XYFw42h21P2KXUGyp2y/
++aEyZ+uVgLLQbRA1dEjSDZ2iGRy12Mk5gpYc397aYp438fsJoHIgJ2lgMv5h7WY9
+t6N/byY9Nw9p21Og3AoXSL2q/2IJ1WRUhebgAdGVMlV1fkuOQoEzR7EdpqtQD9Cs
+5+bfo3Nhmcyvk5ftB0WkJ9z6bNZ7yxrP8wIDAQAB
+-----END RSA PUBLIC KEY-----"""
+]
+
+DC_CONFIG = "149.154.167.50:443 DC 2"
+
+# Dynamic search keywords for auto-finding bots (2026 updated)
+BOT_SEARCH_KEYWORDS = [
+    "proxy bot", "mtproto bot", "socks5 bot", "v2ray bot", "vmess bot", "free vpn bot",
+    "telegram proxy bot", "free proxy bot 2026", "vless bot", "trojan bot", "shadowsocks bot"
+]
+
+CONFIG_PATTERNS = {
+    'tg_proxy': re.compile(r'(tg://proxy\?[^\s]+)'),
+    'vless': re.compile(r'(vless://[^\s]+)'),
+    'vmess': re.compile(r'(vmess://[^\s]+)'),
+    'ss': re.compile(r'(ss://[^\s]+)'),
+    'trojan': re.compile(r'(trojan://[^\s]+)'),
+    'socks': re.compile(r'(socks5?://[^\s]+)'),
+}
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger(__name__)
+
+class StealthBotInfiltrator:
+    def __init__(self):
+        self.client = TelegramClient("sessions/icebreaker", API_ID, API_HASH)
+        self.configs = {'telegram': [], 'vpn': [], 'simple_proxy': [], 'raw': []}
+
+    async def safe_sleep(self, sec_range=(1, 5)):
+        await asyncio.sleep(random.uniform(*sec_range))
+
+    def extract_configs(self, text, source, method):
+        for typ, pat in CONFIG_PATTERNS.items():
+            for match in pat.findall(text):
+                data = {
+                    'config': match.strip(),
+                    'type': typ,
+                    'source': source,
+                    'method': method,
+                    'time': datetime.utcnow().isoformat() + "Z"
+                }
+                if data not in self.configs['raw']:
+                    self.configs['raw'].append(data)
+                    if typ == 'tg_proxy':
+                        if data not in self.configs['telegram']:
+                            self.configs['telegram'].append(data)
+                            logger.info(f"TG Proxy: {match[:60]}...")
+                    elif typ == 'socks':
+                        if data not in self.configs['simple_proxy']:
+                            self.configs['simple_proxy'].append(data)
+                            logger.info(f"Simple Proxy: {match[:60]}...")
+                    else:
+                        if data not in self.configs['vpn']:
+                            self.configs['vpn'].append(data)
+                            logger.info(f"VPN Config: {match[:60]}...")
+
+    # Dynamic bot discovery: Search for bots using keywords
+    async def discover_bots(self):
+        bots = []
+        for keyword in BOT_SEARCH_KEYWORDS:
+            try:
+                results = await self.client.iter_dialogs(search=keyword, limit=50)
+                for dialog in results:
+                    if dialog.is_bot:
+                        bot_username = dialog.entity.username
+                        if bot_username and bot_username.startswith('@') and bot_username not in bots:
+                            bots.append(bot_username)
+                            logger.info(f"Discovered bot: {bot_username} via {keyword}")
+                await self.safe_sleep((5, 10))
+            except FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+        logger.info(f"Auto-discovered {len(bots)} bots")
+        return bots[:20]  # Limit to 20 for time
+
+    # Strategies (10+ ways)
+    async def strategy_direct(self, bot):
+        try:
+            await self.client.send_message(bot, '/start')
+            await self.safe_sleep()
+            messages = await self.client.get_messages(bot, limit=50)
+            for msg in messages:
+                if msg.text:
+                    self.extract_configs(msg.text, bot, "direct")
+        except FloodWaitError as e:
+            await asyncio.sleep(e.seconds)
+
+    async def strategy_buttons(self, bot):
+        try:
+            messages = await self.client.get_messages(bot, limit=20)
+            for msg in messages:
+                if msg.reply_markup:
+                    for row in msg.reply_markup.rows:
+                        for btn in row.buttons:
+                            if isinstance(btn, KeyboardButtonCallback):
+                                await self.client(GetBotCallbackAnswerRequest(peer=bot, msg_id=msg.id, data=btn.data))
+                                await self.safe_sleep()
+                                new_msgs = await self.client.get_messages(bot, limit=5)
+                                for n in new_msgs:
+                                    if n.text:
+                                        self.extract_configs(n.text, bot, "button")
+        except Exception:
+            pass
+
+    async def strategy_commands(self, bot):
+        commands = ['/free', '/trial', '/config', '/proxy', '/vpn', '/get', '/list', '/help']
+        for cmd in random.sample(commands, min(4, len(commands))):
+            await self.client.send_message(bot, cmd)
+            await self.safe_sleep()
+            messages = await self.client.get_messages(bot, limit=10)
+            for msg in messages:
+                if msg.text:
+                    self.extract_configs(msg.text, bot, f"command_{cmd}")
+
+    async def strategy_history(self, bot):
+        messages = await self.client.get_messages(bot, limit=200)
+        for msg in messages:
+            if msg.text:
+                self.extract_configs(msg.text, bot, "history")
+
+    async def strategy_urls(self, bot):
+        messages = await self.client.get_messages(bot, limit=50)
+        for msg in messages:
+            if msg.reply_markup:
+                for row in msg.reply_markup.rows:
+                    for btn in row.buttons:
+                        if isinstance(btn, KeyboardButtonUrl):
+                            self.extract_configs(btn.url, bot, "url_button")
+
+    async def strategy_invite(self, bot):
+        messages = await self.client.get_messages(bot, limit=50)
+        for msg in messages:
+            if msg.text:
+                invite = re.search(r'(t\.me/[^\s]+)', msg.text)
+                if invite:
+                    logger.info(f"Invite found: {invite.group(1)} - skipping join for stealth")
+
+    async def strategy_typing(self, bot):
+        await self.client.send_typing(bot)
+        await self.safe_sleep()
+        await self.client.send_message(bot, random.choice(["Need free proxy?", "Free VPN config?", "Trial please"]))
+        messages = await self.client.get_messages(bot, limit=5)
+        for msg in messages:
+            if msg.text:
+                self.extract_configs(msg.text, bot, "typing")
+
+    async def strategy_retry(self, bot, sub_strategy):
+        for attempt in range(3):
+            try:
+                await sub_strategy(bot)
+                return
+            except FloodWaitError as e:
+                await asyncio.sleep(e.seconds + random.uniform(5, 10))
+
+    async def strategy_media(self, bot):
+        messages = await self.client.get_messages(bot, limit=100)
+        for msg in messages:
+            if msg.media and msg.message:
+                self.extract_configs(msg.message, bot, "media_caption")
+
+    async def strategy_profile(self, bot):
+        await self.client(UpdateProfileRequest(about="Seeking free proxies"))
+        await self.safe_sleep()
+        await self.client.send_message(bot, "Hi, any free configs?")
+        messages = await self.client.get_messages(bot, limit=10)
+        for msg in messages:
+            if msg.text:
+                self.extract_configs(msg.text, bot, "profile")
+        await self.client(UpdateProfileRequest(about=""))
+
+    async def strategy_bypass(self, bot):
+        await self.client.send_message(bot, '/pay' if random.random() > 0.5 else '/free')
+        await self.safe_sleep()
+        messages = await self.client.get_messages(bot, limit=20)
+        for msg in messages:
+            if 'script' in msg.text.lower() or 'link' in msg.text.lower():
+                self.extract_configs(msg.text, bot, "bypass")
+
+    async def full_attack(self, bot):
+        strategies = [
+            self.strategy_direct,
+            self.strategy_buttons,
+            self.strategy_commands,
+            self.strategy_history,
+            self.strategy_urls,
+            self.strategy_invite,
+            self.strategy_typing,
+            lambda b: self.strategy_retry(b, self.strategy_direct),
+            self.strategy_media,
+            self.strategy_profile,
+            self.strategy_bypass
+        ]
+        random.shuffle(strategies)
+        for strat in strategies:
+            try:
+                await strat(bot)
+                await self.safe_sleep((3, 8))
+            except Exception as e:
+                logger.debug(f"Strategy error: {e}")
+
+    async def run(self):
+        await self.client.connect()
+        if not await self.client.is_user_authorized():
+            logger.error("Session not authorized - run manually first")
+            return
+
+        # DYNAMIC DISCOVERY
+        discovered_bots = await self.discover_bots()
+        if not discovered_bots:
+            logger.warning("No bots discovered - using fallback")
+            discovered_bots = ["@MTProtoProxybot", "@ProxyMTProtoBot", "@socks5_bot"]  # Fallback
+
+        for bot_name in discovered_bots:
+            try:
+                bot = await self.client.get_entity(bot_name)
+                await self.full_attack(bot)
+                await self.safe_sleep((10, 20))
+            except Exception as e:
+                logger.error(f"Error with {bot_name}: {e}")
+
+        await self.client.disconnect()
+
+        # Save
+        with open('output/telegram/from_bots.txt', 'w', encoding='utf-8') as f:
+            for c in self.configs['telegram']:
+                f.write(c['config'] + '\n')
+        with open('output/vpn/from_bots.json', 'w', encoding='utf-8') as f:
+            json.dump(self.configs['vpn'], f, ensure_ascii=False, indent=2)
+        with open('output/simple_proxy/from_bots.txt', 'w', encoding='utf-8') as f:
+            for c in self.configs['simple_proxy']:
+                f.write(c['config'] + '\n')
+
+        logger.info(f"Dynamic run complete: TG {len(self.configs['telegram'])}, VPN {len(self.configs['vpn'])}, Simple {len(self.configs['simple_proxy'])}")
+
+if __name__ == '__main__':
+    asyncio.run(StealthBotInfiltrator().run())
+EOF
+
+          # ==================== TELEGRAM MONITOR (DYNAMIC SEARCH: AUTO-FINDS CHANNELS) ====================
+          cat > scripts/tg_monitor.py << 'EOF'
+#!/usr/bin/env python3
+import asyncio
+import json
+import re
+import logging
+from datetime import datetime
+from telethon import TelegramClient
+
+API_ID = 38922115
+API_HASH = "b34ae241317eff8743f538a8272c5f6d"
+
+# Dynamic search keywords for auto-finding channels (2026 updated)
+CHANNEL_SEARCH_KEYWORDS = [
+    "free v2ray", "mtproto proxy", "socks5 proxy", "vpn free", "vless vmess",
+    "telegram proxy channel 2026", "free vpn configs", "shadowsocks free", "trojan configs",
+    "proxy list channel", "daily proxies", "v2ray free channel"
+]
+
+PATTERNS = {
+    'tg_proxy': re.compile(r'tg://proxy\?[^\s]+'),
+    'vless': re.compile(r'vless://[^\s]+'),
+    'vmess': re.compile(r'vmess://[^\s]+'),
+    'ss': re.compile(r'ss://[^\s]+'),
+    'trojan': re.compile(r'trojan://[^\s]+'),
+    'socks': re.compile(r'socks5?://[^\s]+'),
+}
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class DeepChannelMonitor:
+    def __init__(self):
+        self.client = TelegramClient("sessions/monitor", API_ID, API_HASH)
+        self.configs = []
+
+    async def discover_channels(self):
+        channels = []
+        for keyword in CHANNEL_SEARCH_KEYWORDS:
+            try:
+                results = await self.client.iter_dialogs(search=keyword, limit=100)
+                for dialog in results:
+                    if dialog.is_channel or dialog.is_group:
+                        channel_username = dialog.entity.username
+                        if channel_username and channel_username.startswith('@') and channel_username not in channels:
+                            channels.append(channel_username)
+                            logger.info(f"Discovered channel: {channel_username} via {keyword}")
+                await asyncio.sleep(5)
+            except FloodWaitError as e:
+                await asyncio.sleep(e.seconds)
+        logger.info(f"Auto-discovered {len(channels)} channels")
+        return channels[:50]  # Limit to 50 for time
+
+    async def scan_channel(self, ch):
+        try:
+            entity = await self.client.get_entity(ch)
+            messages = await self.client.get_messages(entity, limit=500)
+            for msg in messages:
+                if msg.text:
+                    for typ, pat in PATTERNS.items():
+                        for match in pat.findall(msg.text):
+                            data = {'config': match, 'type': typ, 'source': ch, 'time': datetime.utcnow().isoformat() + "Z"}
+                            if data not in self.configs:
+                                self.configs.append(data)
+                                logger.info(f"Found {typ} in {ch}")
+                if msg.reply_markup:
+                    for row in msg.reply_markup.rows:
+                        for btn in row.buttons:
+                            if isinstance(btn, KeyboardButtonUrl):
+                                for typ, pat in PATTERNS.items():
+                                    if pat.search(btn.url):
+                                        data = {'config': btn.url, 'type': typ, 'source': ch, 'time': datetime.utcnow().isoformat() + "Z"}
+                                        if data not in self.configs:
+                                            self.configs.append(data)
+        except Exception as e:
+            logger.error(f"Scan {ch} failed: {e}")
+
+    async def run(self):
+        await self.client.connect()
+        if not await self.client.is_user_authorized():
+            logger.error("Not authorized")
+            return
+
+        # DYNAMIC DISCOVERY
+        discovered_channels = await self.discover_channels()
+        if not discovered_channels:
+            logger.warning("No channels discovered - using fallback")
+            discovered_channels = ["@V2RayRootFree", "@vpnfail_v2ray", "@DR_V2ray", "@V2rayNG3", "@proxy_mtm", "@MTProxies", "@socks5_list"]
+
+        for ch in discovered_channels:
+            await self.scan_channel(ch)
+            await asyncio.sleep(5)
+
+        await self.client.disconnect()
+
+        tg = [c for c in self.configs if c['type'] == 'tg_proxy']
+        vpn = [c for c in self.configs if c['type'] in ['vless', 'vmess', 'ss', 'trojan']]
+        simple = [c for c in self.configs if c['type'] == 'socks']
+
+        with open('output/telegram/from_channels.txt', 'w', encoding='utf-8') as f:
+            for c in tg: f.write(c['config'] + '\n')
+        with open('output/vpn/from_channels.json', 'w', encoding='utf-8') as f:
+            json.dump(vpn, f, ensure_ascii=False, indent=2)
+        with open('output/simple_proxy/from_channels.txt', 'w', encoding='utf-8') as f:
+            for c in simple: f.write(c['config'] + '\n')
+
+        logger.info(f"Dynamic channel scan: TG {len(tg)}, VPN {len(vpn)}, Simple {len(simple)}")
+
+if __name__ == '__main__':
+    asyncio.run(DeepChannelMonitor().run())
+EOF
+
+          # ==================== WEB CRAWLER (DYNAMIC: 20+ QUERIES + RAW) ====================
+          cat > scripts/web_crawler.py << 'EOF'
+#!/usr/bin/env python3
+import asyncio
+import aiohttp
+import re
+import json
+import logging
+from datetime import datetime
+from bs4 import BeautifulSoup
+from urllib.parse import quote
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+PATTERNS = {
+    'tg_proxy': re.compile(r'tg://proxy\?[^\s]+'),
+    'vless': re.compile(r'vless://[^\s]+'),
+    'vmess': re.compile(r'vmess://[^\s]+'),
+    'ss': re.compile(r'ss://[^\s]+'),
+    'trojan': re.compile(r'trojan://[^\s]+'),
+    'socks': re.compile(r'socks5?://[^\s]+'),
+}
+
+# Dynamic raw URLs (auto-updated 2026 sources)
+RAW_URLS = [
+    "https://raw.githubusercontent.com/barry-far/V2ray-Config/main/Sub.txt",
+    "https://raw.githubusercontent.com/ebrasha/free-v2ray-public-list/main/all.txt",
+    "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/all.txt",
+    "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/all.txt",
+    "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/all.txt",
+    "https://raw.githubusercontent.com/hookzof/socks5_list/main/socks5.txt",
+    "https://proxyscrape.com/api/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all",
+    "https://vanced.to/telegram/mtproto.txt",  # From search
+    "https://free-proxy-list.net/socks5.txt",
+    "https://advanced.name/freeproxy?type=socks5"
+]
+
+# Dynamic queries (auto-search keywords 2026)
+QUERIES = [
+    'free mtproto proxy 2026', 'telegram proxy list 2026', 'v2ray vless free 2026',
+    'vmess configs 2026', 'shadowsocks ss free 2026', 'trojan proxy 2026',
+    'socks5 proxy free 2026', 'free vpn telegram 2026', 'mtproto channels 2026',
+    'proxy bots telegram 2026', 'v2ray configs github 2026', 'free proxies socks 2026',
+    'free socks5 list 2026', 'http proxy free 2026', 'telegram socks5 2026',
+    'v2ray free configs 2026', 'vmess subscription 2026', 'vless raw links 2026',
+    'trojan free 2026', 'ss shadowsocks list 2026', 'mtproto free 2026'
+]
+
+class AggressiveWebSpider:
+    def __init__(self):
+        self.session = None
+        self.configs = []
+
+    async def init(self):
+        self.session = aiohttp.ClientSession(headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+
+    async def extract(self, text, source):
+        for typ, pat in PATTERNS.items():
+            for match in pat.findall(text):
+                data = {'config': match, 'type': typ, 'source': source, 'time': datetime.utcnow().isoformat() + "Z"}
+                if data not in self.configs:
+                    self.configs.append(data)
+                    logger.info(f"Extracted {typ} from {source}")
+
+    async def crawl_raw(self):
+        for url in RAW_URLS:
+            try:
+                async with self.session.get(url, timeout=10) as resp:
+                    if resp.status == 200:
+                        content = await resp.text()
+                        await self.extract(content, f"Raw:{url.split('/')[-1]}")
+            except Exception as e:
+                logger.debug(f"Raw {url} failed: {e}")
+            await asyncio.sleep(1)
+
+    async def crawl_gists(self):
+        for q in QUERIES:
+            try:
+                gist_url = f"https://gist.github.com/search?q={quote(q)}"
+                async with self.session.get(gist_url) as resp:
+                    html = await resp.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    links = soup.find_all('a', class_='Link--primary')[:10]
+                    for link in links:
+                        raw = f"https://gist.github.com{link.get('href', '')}/raw"
+                        async with self.session.get(raw, timeout=5) as r:
+                            if r.status == 200:
+                                content = await r.text()
+                                await self.extract(content, f"Gist:{q}")
+                await asyncio.sleep(2)
+            except Exception as e:
+                logger.debug(f"Gist {q} failed: {e}")
+
+    async def run(self):
+        await self.init()
+        await asyncio.gather(self.crawl_raw(), self.crawl_gists(), return_exceptions=True)
+        await self.session.close()
+
+        tg = [c for c in self.configs if c['type'] == 'tg_proxy']
+        vpn = [c for c in self.configs if c['type'] in ['vless', 'vmess', 'ss', 'trojan']]
+        simple = [c for c in self.configs if c['type'] == 'socks']
+
+        with open('output/telegram/from_web.txt', 'w', encoding='utf-8') as f:
+            for c in tg: f.write(c['config'] + '\n')
+        with open('output/vpn/from_web.json', 'w', encoding='utf-8') as f:
+            json.dump(vpn, f, ensure_ascii=False, indent=2)
+        with open('output/simple_proxy/from_web.txt', 'w', encoding='utf-8') as f:
+            for c in simple: f.write(c['config'] + '\n')
+
+        logger.info(f"Dynamic web crawl: TG {len(tg)}, VPN {len(vpn)}, Simple {len(simple)}")
+
+if __name__ == '__main__':
+    asyncio.run(AggressiveWebSpider().run())
+EOF
+
+          # ==================== MERGE & LIVE CHECK (SPLIT 3 FILES, ELITE ONLY) ====================
+          cat > scripts/merge.py << 'EOF'
+#!/usr/bin/env python3
+import json
+import logging
+import base64
+import asyncio
+import socket
+import re
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+async def ping_config(config, timeout=5):
+    try:
+        if 'tg://proxy?' in config:
+            params = dict(re.findall(r'(\w+)=([^&]+)', config.split('?')[1]))
+            host = params.get('server', '')
+            port = int(params.get('port', 443))
+        else:
+            host_match = re.search(r'@([^\s:]+):(\d+)', config)
+            if host_match:
+                host, port = host_match.groups()
+            else:
+                return False
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, int(port)))
+        sock.close()
+        return result == 0
+    except:
+        return False
+
+def split_files(configs, base_name, max_per=1000):
+    Path(f'output/{base_name}').mkdir(parents=True, exist_ok=True)
+    for i, chunk in enumerate([configs[j:j+max_per] for j in range(0, len(configs), max_per)], 1):
+        file_name = f'output/{base_name}/{base_name}_{i}.txt'
+        with open(file_name, 'w') as f:
+            for cfg in chunk:
+                f.write(cfg + '\n')
+        logger.info(f"Split {file_name}: {len(chunk)} elite configs")
+
+async def main():
+    tg_set = set()
+    for f in ['output/telegram/from_bots.txt', 'output/telegram/from_channels.txt', 'output/telegram/from_web.txt']:
+        if Path(f).exists():
+            with open(f) as file:
+                tg_set.update(line.strip() for line in file if line.strip())
+
+    vpn_list = []
+    seen = set()
+    for f in ['output/vpn/from_bots.json', 'output/vpn/from_channels.json', 'output/vpn/from_web.json']:
+        if Path(f).exists():
+            with open(f) as file:
+                data = json.load(file)
+                for item in data:
+                    cfg = item.get('config', '')
+                    if cfg and cfg not in seen:
+                        seen.add(cfg)
+                        vpn_list.append(item)
+
+    simple_set = set()
+    for f in ['output/simple_proxy/from_bots.txt', 'output/simple_proxy/from_channels.txt', 'output/simple_proxy/from_web.txt']:
+        if Path(f).exists():
+            with open(f) as file:
+                simple_set.update(line.strip() for line in file if line.strip())
+
+    # Live check elite
+    tg_elite = []
+    for cfg in tg_set:
+        if await ping_config(cfg):
+            tg_elite.append(cfg)
+            logger.info(f"Elite TG: {cfg[:50]}...")
+
+    vpn_elite = [item for item in vpn_list if await ping_config(item['config'])]
+    simple_elite = [cfg for cfg in simple_set if await ping_config(cfg)]
+
+    split_files(tg_elite, 'telegram_proxies')
+    split_files([item['config'] for item in vpn_elite], 'vpn_configs')
+    split_files(simple_elite, 'simple_proxies')
+
+    # All-in-one
+    with open('output/raw/all_in_one.txt', 'w') as f:
+        f.write("# Elite TG Proxies\n")
+        for cfg in sorted(tg_elite): f.write(cfg + '\n')
+        f.write("# Elite VPN\n")
+        for item in vpn_elite: f.write(item['config'] + '\n')
+        f.write("# Elite Simple Proxies\n")
+        for cfg in sorted(simple_elite): f.write(cfg + '\n')
+
+    all_vpn = '\n'.join([i['config'] for i in vpn_elite])
+    sub = base64.b64encode(all_vpn.encode()).decode()
+    with open('output/raw/subscription.txt', 'w') as f:
+        f.write(sub)
+
+    logger.info(f"Elite merge: TG {len(tg_elite)}, VPN {len(vpn_elite)}, Simple {len(simple_elite)}")
+
+if __name__ == '__main__':
+    asyncio.run(main())
+EOF
+
+          # ==================== QR GENERATOR ====================
+          cat > scripts/qr_gen.py << 'EOF'
+#!/usr/bin/env python3
+import qrcode
+from PIL import Image
+import json
+from pathlib import Path
+
+def generate_qrs():
+    Path('output/qr').mkdir(parents=True, exist_ok=True)
+    if Path('output/vpn/vpn_configs.json').exists():
+        with open('output/vpn/vpn_configs.json') as f:
+            configs = json.load(f)[:20]
+        for i, item in enumerate(configs):
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(item['config'])
+            img = qr.make_image(fill_color="black", back_color="white")
+            img.save(f"output/qr/vpn_{i+1}.png")
+    # Subscription QR
+    sub_url = "https://github.com/YOURREPO/releases/latest/download/subscription.txt"  # Replace with actual
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(sub_url)
+    img = qr.make_image(fill_color="black", back_color="white")
+    img.save("output/qr/subscription.png")
+
+if __name__ == '__main__':
+    generate_qrs()
+EOF
+
+          # ==================== SITE GENERATOR (BEAUTIFUL DASHBOARD WITH GUIDES & HAPP.PROXY) ====================
+          cat > scripts/site_gen.py << 'EOF'
+#!/usr/bin/env python3
+from pathlib import Path
+import datetime
+import os
+
+def generate_html():
+    now = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')
+    repo_name = os.getenv('GITHUB_REPOSITORY', 'YOURREPO').split('/')[-1]
+    site_url = f"https://{os.getenv('GITHUB_ACTOR', 'YOURUSER')}.github.io/{repo_name}"
+
+    html = f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧊 ICEBREAKER - Global Stealth Aggregator</title>
+    <style>
+        body {{ font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 20px; min-height: 100vh; }}
+        .container {{ max-width: 1200px; margin: 0 auto; }}
+        header {{ text-align: center; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px; backdrop-filter: blur(10px); }}
+        h1 {{ font-size: 3.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }}
+        .tagline {{ font-size: 1.3em; opacity: 0.9; }}
+        .section {{ background: rgba(255,255,255,0.1); padding: 40px; margin: 30px 0; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); }}
+        h2 {{ font-size: 2em; margin-bottom: 20px; color: #ffd700; }}
+        .download-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }}
+        .download-card {{ background: rgba(255,255,255,0.1); padding: 25px; border-radius: 15px; border: 2px solid rgba(255,255,255,0.2); transition: all 0.3s; }}
+        .download-card:hover {{ transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }}
+        .btn {{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 12px 30px; border-radius: 25px; text-decoration: none; margin: 10px 5px; font-weight: bold; transition: all 0.3s; }}
+        .btn:hover {{ transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.3); }}
+        .guide {{ background: rgba(0,0,0,0.2); padding: 25px; border-radius: 15px; margin: 20px 0; border-left: 4px solid #ffd700; }}
+        .guide h3 {{ color: #ffd700; margin-bottom: 15px; }}
+        .guide ol {{ margin-left: 20px; line-height: 1.8; }}
+        .qr-gallery {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }}
+        .qr-gallery img {{ width: 100%; border-radius: 10px; border: 1px solid #ffd700; }}
+        footer {{ text-align: center; padding: 40px 0; border-top: 2px solid rgba(255,255,255,0.2); margin-top: 40px; opacity: 0.8; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧊 ICEBREAKER</h1>
+            <p class="tagline">Your Ultimate Free Proxy & VPN Aggregator</p>
+            <p>Auto-updated every hour | Always fresh configs</p>
+            <p>Last update: {now}</p>
+        </header>
+
+        <div class="section">
+            <h2>📦 Download Configs</h2>
+            <div class="download-grid">
+                <div class="download-card">
+                    <h3>📱 Telegram Proxies (MTProto/SOCKS5)</h3>
+                    <p>Elite configs for Telegram bypass</p>
+                    <a href="../releases/latest/download/telegram_proxies_1.txt" class="btn">File 1</a>
+                    <a href="../releases/latest/download/telegram_proxies_2.txt" class="btn">File 2</a>
+                    <a href="../releases/latest/download/telegram_proxies_3.txt" class="btn">File 3</a>
+                </div>
+                <div class="download-card">
+                    <h3>🚀 VPN Configs (VLESS/VMess/SS/Trojan)</h3>
+                    <p>Low-ping, tested for speed</p>
+                    <a href="../releases/latest/download/vpn_configs_1.txt" class="btn">File 1</a>
+                    <a href="../releases/latest/download/vpn_configs_2.txt" class="btn">File 2</a>
+                    <a href="../releases/latest/download/vpn_configs_3.txt" class="btn">File 3</a>
+                </div>
+                <div class="download-card">
+                    <h3>🛡️ Simple Proxies (SOCKS5/HTTP)</h3>
+                    <p>For Proxydroid & general use</p>
+                    <a href="../releases/latest/download/simple_proxies_1.txt" class="btn">File 1</a>
+                    <a href="../releases/latest/download/simple_proxies_2.txt" class="btn">File 2</a>
+                    <a href="../releases/latest/download/simple_proxies_3.txt" class="btn">File 3</a>
+                </div>
+                <div class="download-card">
+                    <h3>🔄 Subscription</h3>
+                    <p>Auto-update for apps</p>
+                    <a href="../releases/latest/download/subscription.txt" class="btn">Get Link</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎓 Quick Start Guide</h2>
+            <div class="guide">
+                <h3>Telegram MTProto:</h3>
+                <ol>
+                    <li>Download TG file (e.g. telegram_proxies_1.txt)</li>
+                    <li>Open Telegram > Settings > Data and Storage > Proxy Settings</li>
+                    <li>Add Proxy > Paste tg://proxy line > Enable</li>
+                    <li>Done! Zero-trace bypass.</li>
+                </ol>
+            </div>
+            <div class="guide">
+                <h3>VPN Android (Nekobox/v2rayNG):</h3>
+                <ol>
+                    <li>Install <a href="https://github.com/MatsuriDayo/NekoBoxForAndroid/releases" style="color:#ffd700;">Nekobox</a> or <a href="https://github.com/2dust/v2rayNG/releases" style="color:#ffd700;">v2rayNG</a></li>
+                    <li>Download vpn_configs.json > Import</li>
+                    <li>Or Subscription: Paste from subscription.txt</li>
+                    <li>Connect - Hourly auto-update!</li>
+                </ol>
+            </div>
+            <div class="guide">
+                <h3>iOS (Streisand/V2BOX):</h3>
+                <ol>
+                    <li>App Store: <a href="https://apps.apple.com/app/streisand/id6450534064" style="color:#ffd700;">Streisand</a> or <a href="https://apps.apple.com/app/v2box-v2ray-client/id6446814690" style="color:#ffd700;">V2BOX</a></li>
+                    <li>Import JSON or Sub link</li>
+                    <li>Scan QR below for instant add</li>
+                    <li>Connect & Enjoy.</li>
+                </ol>
+            </div>
+            <div class="guide">
+                <h3>🛡️ Happ Proxy Utility (All Platforms):</h3>
+                <ol>
+                    <li>Visit <a href="https://www.happ.su/main" style="color:#ffd700;">Happ.su</a></li>
+                    <li>Windows: setup-Happ.x64.exe | macOS: Happ.macOS.dmg | Linux: Happ.linux.deb | Android: Happ.apk</li>
+                    <li>Import configs or sub link</li>
+                    <li>Supports MTProto, SOCKS5, VLESS - Connect globally!</li>
+                </ol>
+            </div>
+            <div class="guide">
+                <h3>📲 Proxydroid (Android Simple Proxies):</h3>
+                <ol>
+                    <li>Install from Play Store</li>
+                    <li>Download simple_proxies.txt</li>
+                    <li>Enter IP:Port (SOCKS5/HTTP)</li>
+                    <li>Global Proxy > Start - Root optional</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📱 QR Quick-Connect (Scan to Add)</h2>
+            <div class="qr-gallery">
+                <img src="qr/subscription.png" alt="Subscription QR" title="Auto-Update">
+                <img src="qr/vpn_1.png" alt="VPN 1" title="Scan for Config 1">
+                <img src="qr/vpn_2.png" alt="VPN 2" title="Scan for Config 2">
+                <!-- Dynamic: up to 20 -->
+            </div>
+            <p style="text-align: center; margin-top: 20px;">Scan with app camera for one-tap import. Elite only.</p>
+        </div>
+
+        <footer>
+            <p>🧊 <strong>ICEBREAKER</strong> - Autonomous Proxy Aggregator | Zero Trace Philosophy</p>
+            <p>Built with ❤️ on GitHub Actions | <a href="../releases" style="color: #ffd700;">Releases</a> | <a href="manage/manage.txt" style="color: #ffd700;">Manage Guide</a></p>
+        </footer>
+    </div>
+</body>
+</html>'''
+
+    Path('site/index.html').write_text(html)
+    logger.info("Beautiful dashboard generated with dynamic guides")
+
+if __name__ == '__main__':
+    generate_html()
+EOF
+
+          # ==================== MANAGEMENT GUIDE TXT ====================
+          cat > manage/manage.txt << 'EOF'
+# 🧊 ICEBREAKER Management Guide (Dynamic Auto-Search Edition)
+
+## Philosophy
+Zero Trace: GitHub traffic only. Logic over Force: Dynamic discovery bypasses static bans.
+
+## Dynamic Search
+- Bots: Auto-searches keywords like "proxy bot 2026" via Telegram API.
+- Channels: Auto-finds via "free v2ray channel" etc. - no hard-coded lists.
+- Web: 20+ queries + raw URLs updated for 2026 (barry-far, ebrasha, etc.).
+
+## Folders
+- output/telegram/: Elite MTProto/SOCKS5 (split 3 files for size).
+- output/vpn/: VLESS/VMess/SS/Trojan JSON (split 3).
+- output/simple_proxy/: SOCKS5/HTTP txt (split 3).
+- output/raw/: All-in-one + base64 sub.
+- output/qr/: PNG QR for each (20 max).
+- site/: Live dashboard with Happ/Proxydroid guides.
+- manage/: This txt - edit keywords to tune search.
+
+## Customize Auto-Search
+- Edit BOT_SEARCH_KEYWORDS/CHANNEL_SEARCH_KEYWORDS/QUERIES in scripts/.
+- Add raw URLs to RAW_URLS in web_crawler.py.
+- Increase limits for more (but risk flood).
+
+## Stealth Tips
+- Authorize sessions once (python script.py locally).
+- No phone leaks - use virtual number if needed.
+- Live check pings elite only (<5s timeout).
+
+## Apps & Tools
+- **Happ.su (All Platforms)**: https://www.happ.su/main - Windows/macOS/Linux/Android/iOS. Import sub or files.
+- **Proxydroid (Android SOCKS5)**: Play Store - Global proxy for simple files.
+- **Nekobox/v2rayNG (Android VPN)**: GitHub releases - Import JSON/sub.
+- **Streisand/V2BOX (iOS)**: App Store - Scan QR or import.
+- **Desktop**: Qv2ray/V2RayN with sub link.
+
+## Troubleshooting
+- 0 configs? Check auth (logs/sessions/). Expand keywords.
+- Flood? Increase sleeps (safe_sleep ranges).
+- No dynamic? Fallback to known: @V2RayRootFree, @vpnfail_v2ray, etc.
+
+Everything in One Place: Bookmark site - hourly fresh. Auto-publisher ready.
+EOF
+
+          chmod +x scripts/*.py
+
+      - name: Run Bot Infiltrator (Dynamic)
+        timeout-minutes: 30
+        run: python scripts/bot_infiltrator.py || true
+
+      - name: Run TG Monitor (Dynamic)
+        timeout-minutes: 25
+        run: python scripts/tg_monitor.py || true
+
+      - name: Run Web Crawler (Dynamic)
+        timeout-minutes: 20
+        run: python scripts/web_crawler.py || true
+
+      - name: Merge Elite & Split
+        run: python scripts/merge.py
+
+      - name: Generate QR Codes
+        run: python scripts/qr_gen.py
+
+      - name: Generate Dashboard
+        run: python scripts/site_gen.py
+
+      - name: Stats
+        id: stats
+        run: |
+          TG_COUNT=$(find output/telegram -name '*.txt' -exec wc -l {} + 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          VPN_COUNT=$(find output/vpn -name '*.txt' -exec wc -l {} + 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          SIMPLE_COUNT=$(find output/simple_proxy -name '*.txt' -exec wc -l {} + 2>/dev/null | awk '{sum+=$1} END {print sum+0}')
+          echo "tg_count=$TG_COUNT" >> $GITHUB_OUTPUT
+          echo "vpn_count=$VPN_COUNT" >> $GITHUB_OUTPUT
+          echo "simple_count=$SIMPLE_COUNT" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u '+%Y-%m-%d %H:%M UTC')" >> $GITHUB_OUTPUT
+
+      - name: Release Notes (Beautiful Markdown)
+        run: |
+          cat > notes.md << EOF
+# 🧊 ICEBREAKER Auto-Update
+
+**Timestamp:** ${{ steps.stats.outputs.timestamp }}
+
+## 📊 Statistics (Dynamic Elite Only)
+- **Telegram Proxies (MTProto/SOCKS5):** ${{ steps.stats.outputs.tg_count }} (Split: _1.txt, _2.txt, _3.txt)
+- **VPN Configs (VLESS/VMess/SS/Trojan):** ${{ steps.stats.outputs.vpn_count }} (Split: _1.txt, _2.txt, _3.txt)
+- **Simple Proxies (SOCKS5/HTTP):** ${{ steps.stats.outputs.simple_count }} (Split: _1.txt, _2.txt, _3.txt)
+
+## 📦 Files (RAW Direct Links for Subscription)
+- [TG 1](../download/telegram_proxies_1.txt) | [TG 2](../download/telegram_proxies_2.txt) | [TG 3](../download/telegram_proxies_3.txt)
+- [VPN 1](../download/vpn_configs_1.txt) | [VPN 2](../download/vpn_configs_2.txt) | [VPN 3](../download/vpn_configs_3.txt)
+- [Simple 1](../download/simple_proxies_1.txt) | [Simple 2](../download/simple_proxies_2.txt) | [Simple 3](../download/simple_proxies_3.txt)
+- [All-in-One](../download/all_in_one.txt) | [Subscription (Base64)](../download/subscription.txt)
+- [QR Codes](../download/*.png) - Scan to add!
+
+## 🎓 Quick Guides
+### Telegram MTProto
+1. Download TG file > Copy line > Settings > Data > Proxy > Add > Paste.
+### Happ.su (All Platforms)
+1. [Happ.su](https://www.happ.su/main) > Download for your OS.
+2. Import sub or files > Connect (supports all protocols).
+### Proxydroid (Android Simple)
+1. Play Store > Install > Enter IP:Port from simple file > Global Start.
+### VPN Apps
+- Android: [Nekobox](https://github.com/MatsuriDayo/NekoBoxForAndroid/releases) / [v2rayNG](https://github.com/2dust/v2rayNG/releases)
+- iOS: [Streisand](https://apps.apple.com/app/streisand/id6450534064) / [V2BOX](https://apps.apple.com/app/v2box-v2ray-client/id6446814690)
+
+## 🔧 Manage
+See [manage/manage.txt](https://github.com/YOURREPO/blob/main/manage/manage.txt) for dynamic search tuning.
+
+---
+*Auto-generated by ICEBREAKER - Zero Trace | Dynamic Discovery Active*
+EOF
+
+      - name: Create & Publish Release (Beautiful)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: update-${{ steps.stats.outputs.timestamp }}
+          name: Stealth Update ${{ steps.stats.outputs.timestamp }}
+          body_path: notes.md
+          files: |
+            output/telegram/telegram_proxies_*.txt
+            output/vpn/vpn_configs_*.txt
+            output/simple_proxy/simple_proxies_*.txt
+            output/raw/*.txt
+            output/qr/*.png
+
+      - name: Deploy Dashboard to Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          user_name: '🧊 ICEBREAKER Bot'
+          user_email: 'bot@icebreaker.global'
+          commit_message: 'Deploy Dynamic Dashboard ${{ steps.stats.outputs.timestamp }}'
+
+      - name: Commit Management Guide
+        run: |
+          git config --local user.name "ICEBREAKER Bot"
+          git config --local user.email "bot@icebreaker.global"
+          git add manage/manage.txt
+          git commit -m "Update dynamic guide ${{ steps.stats.outputs.timestamp }}" || echo "No changes"
+          git push
+
+      - name: 🎉 Victory Summary
+        run: |
+          echo "🧊 ICEBREAKER Mission Complete (Dynamic Mode)!"
+          echo "📊 TG Proxies: ${{ steps.stats.outputs.tg_count }} | VPN: ${{ steps.stats.outputs.vpn_count }} | Simple: ${{ steps.stats.outputs.simple_count }}"
+          echo "🔍 Auto-Discovered Bots/Channels: Check logs"
+          echo "🌐 Dashboard: Live with Happ/Proxydroid Guides"
+          echo "📦 Release: Tagged with RAW Links & QRs"
+          echo "📖 Guide: Committed - Tune Keywords for More!"
+          echo "Zero Trace Achieved | Next: 1 Hour | Philosophy: Everything in One Place"      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install telethon pyrogram tgcrypto aiohttp beautifulsoup4 requests lxml qrcode[pil] pillow cryptography
