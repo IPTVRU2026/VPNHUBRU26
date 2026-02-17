@@ -1,0 +1,9 @@
+{
+  "checked_at": "2026-02-17 21:55:29",
+  "stats": {
+    "vpn_working": 33556,
+    "tg_working": 0,
+    "total_checked": 80440,
+    "success_rate": "44.5%"
+  }
+}
