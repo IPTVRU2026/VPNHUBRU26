@@ -1,73 +1,18 @@
-# 🧊 ICEBREAKER — VPN Конфиги
+# 🧊 ICEBREAKER ULTIMATE
 
-> 🌐 **Сайт:** [https://iptvru2026.github.io/VPNRU](https://iptvru2026.github.io/VPNRU)
-> 📥 **Последний релиз:** [https://github.com/IPTVRU2026/VPNHUBRU26/releases/latest](https://github.com/IPTVRU2026/VPNHUBRU26/releases/latest)
+[![Site](https://img.shields.io/badge/🌐_САЙТ-https:%2F%2Fiptvru2026.github.io%2FVPNRU%2Findex.html-blue)](https://iptvru2026.github.io/VPNRU/index.html)
+[![VPN](https://img.shields.io/badge/VPN-123469-green)](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/vpn_configs.txt)
+[![TG](https://img.shields.io/badge/Telegram-0-blue?logo=telegram)](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/telegram_proxies.txt)
 
-Автоматически обновляемые VPN конфиги из 60+ источников.
-Обновлено: `15:58 | 17.02.2026` (МСК)
+## 🌐 **[ОТКРЫТЬ САЙТ](https://iptvru2026.github.io/VPNRU/index.html)**
 
-## 📋 Файлы конфигов
+## 📥 Ссылки
 
-| № | Файл | Источник | Время | Дата |
-|--|--|--|--|--|
-| 1 | [`1.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/1.txt) | [sakha1370/OpenRay](https://github.com/sakha1370/OpenRay/raw/refs/heads/main/output/all_valid_proxies.txt) | 15:58 | 17.02.2026 |
-| 2 | [`2.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/2.txt) | [sevcator/5ubscrpt10n](https://raw.githubusercontent.com/sevcator/5ubscrpt10n/main/protocols/vl.txt) | Никогда | Никогда |
-| 3 | [`3.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/3.txt) | [yitong2333/proxy-minging](https://raw.githubusercontent.com/yitong2333/proxy-minging/refs/heads/main/v2ray.txt) | 15:58 | 17.02.2026 |
-| 4 | [`4.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/4.txt) | [acymz/AutoVPN](https://raw.githubusercontent.com/acymz/AutoVPN/refs/heads/main/data/V2.txt) | 15:58 | 17.02.2026 |
-| 5 | [`5.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/5.txt) | [miladtahanian/V2RayCFGDumper](https://raw.githubusercontent.com/miladtahanian/V2RayCFGDumper/refs/heads/main/config.txt) | 15:58 | 17.02.2026 |
-| 6 | [`6.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/6.txt) | [roosterkid/openproxylist](https://raw.githubusercontent.com/roosterkid/openproxylist/main/V2RAY_RAW.txt) | 15:58 | 17.02.2026 |
-| 7 | [`7.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/7.txt) | [Epodonios/v2ray-configs](https://github.com/Epodonios/v2ray-configs/raw/main/Splitted-By-Protocol/trojan.txt) | 15:58 | 17.02.2026 |
-| 8 | [`8.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/8.txt) | [CidVpn/cid-vpn-config](https://raw.githubusercontent.com/CidVpn/cid-vpn-config/refs/heads/main/general.txt) | 15:58 | 17.02.2026 |
-| 9 | [`9.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/9.txt) | [mheidari98/.proxy](https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/vless) | 15:58 | 17.02.2026 |
-| 10 | [`10.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/10.txt) | [youfoundamin/V2rayCollector](https://raw.githubusercontent.com/youfoundamin/V2rayCollector/main/mixed_iran.txt) | 15:58 | 17.02.2026 |
-| 11 | [`11.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/11.txt) | [mheidari98/.proxy](https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/all) | 15:58 | 17.02.2026 |
-| 12 | [`12.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/12.txt) | [MahsaNetConfigTopic/config](https://raw.githubusercontent.com/MahsaNetConfigTopic/config/refs/heads/main/xray_final.txt) | 15:58 | 17.02.2026 |
-| 13 | [`13.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/13.txt) | [LalatinaHub/Mineral](https://github.com/LalatinaHub/Mineral/raw/refs/heads/master/result/nodes) | 15:58 | 17.02.2026 |
-| 14 | [`14.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/14.txt) | [miladtahanian/Config-Collector](https://github.com/miladtahanian/Config-Collector/raw/refs/heads/main/vless_iran.txt) | 15:58 | 17.02.2026 |
-| 15 | [`15.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/15.txt) | [Pawdroid/Free-servers](https://raw.githubusercontent.com/Pawdroid/Free-servers/refs/heads/main/sub) | 15:58 | 17.02.2026 |
-| 16 | [`16.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/16.txt) | [MhdiTaheri/V2rayCollector_Py](https://github.com/MhdiTaheri/V2rayCollector_Py/raw/refs/heads/main/sub/Mix/mix.txt) | 15:58 | 17.02.2026 |
-| 17 | [`17.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/17.txt) | [free18/v2ray](https://raw.githubusercontent.com/free18/v2ray/refs/heads/main/v.txt) | 15:58 | 17.02.2026 |
-| 18 | [`18.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/18.txt) | [MhdiTaheri/V2rayCollector](https://github.com/MhdiTaheri/V2rayCollector/raw/refs/heads/main/sub/mix) | 15:58 | 17.02.2026 |
-| 19 | [`19.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/19.txt) | [Argh94/Proxy-List](https://github.com/Argh94/Proxy-List/raw/refs/heads/main/All_Config.txt) | 15:58 | 17.02.2026 |
-| 20 | [`20.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/20.txt) | [shabane/kamaji](https://raw.githubusercontent.com/shabane/kamaji/master/hub/merged.txt) | 15:58 | 17.02.2026 |
-| 21 | [`21.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/21.txt) | [wuqb2i4f/xray-config-toolkit](https://raw.githubusercontent.com/wuqb2i4f/xray-config-toolkit/main/output/base64/mix-uri) | 15:58 | 17.02.2026 |
-| 22 | [`22.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/22.txt) | [Delta-Kronecker/Xray](https://raw.githubusercontent.com/Delta-Kronecker/Xray/refs/heads/main/data/working_url/working_all_urls.txt) | 15:58 | 17.02.2026 |
-| 23 | [`23.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/23.txt) | [V2RayRoot/V2RayConfig](https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/refs/heads/main/Config/vless.txt) | 15:58 | 17.02.2026 |
-| 24 | [`24.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/24.txt) | [mohamadfg-dev/telegram-v2ray-configs-collector](https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/vless.txt) | 15:58 | 17.02.2026 |
-| 25 | [`25.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/25.txt) | [mohamadfg-dev/telegram-v2ray-configs-collector](https://raw.githubusercontent.com/mohamadfg-dev/telegram-v2ray-configs-collector/refs/heads/main/category/trojan.txt) | 15:58 | 17.02.2026 |
-| 26 | [`26.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/26.txt) | [soroushmirzaei/telegram-configs-collector](https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/channels/protocols/vless) | Никогда | Никогда |
-| 27 | [`27.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/27.txt) | [soroushmirzaei/telegram-configs-collector](https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/channels/protocols/vmess) | Никогда | Никогда |
-| 28 | [`28.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/28.txt) | [soroushmirzaei/telegram-configs-collector](https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/channels/protocols/trojan) | Никогда | Никогда |
-| 29 | [`29.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/29.txt) | [soroushmirzaei/telegram-configs-collector](https://raw.githubusercontent.com/soroushmirzaei/telegram-configs-collector/main/channels/protocols/shadowsocks) | Никогда | Никогда |
-| 30 | [`30.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/30.txt) | [mahdibland/V2RayAggregator](https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/Eternity.txt) | 15:58 | 17.02.2026 |
-| 31 | [`31.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/31.txt) | [IranianCypherpunks/sub](https://raw.githubusercontent.com/IranianCypherpunks/sub/main/config) | Никогда | Никогда |
-| 32 | [`32.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/32.txt) | [AzadNet/AzadNet.github.io](https://raw.githubusercontent.com/AzadNet/AzadNet.github.io/master/configs/mix) | Никогда | Никогда |
-| 33 | [`33.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/33.txt) | [MatinGhanbari/v2ray-configs](https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/xray/all_configs.txt) | Никогда | Никогда |
-| 34 | [`34.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/34.txt) | [Surfboardv2ray/TGParse](https://raw.githubusercontent.com/Surfboardv2ray/TGParse/main/splitted/mix) | Никогда | Никогда |
-| 35 | [`35.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/35.txt) | [Surfboardv2ray/Proxy-sorter](https://raw.githubusercontent.com/Surfboardv2ray/Proxy-sorter/main/subfile/splitted/vless) | Никогда | Никогда |
-| 36 | [`36.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/36.txt) | [yebekhe/TelegramV2rayCollector](https://raw.githubusercontent.com/yebekhe/TelegramV2rayCollector/main/sub/base64/mix) | Никогда | Никогда |
-| 37 | [`37.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/37.txt) | [yebekhe/TelegramV2rayCollector](https://raw.githubusercontent.com/yebekhe/TelegramV2rayCollector/main/sub/normal/mix) | Никогда | Никогда |
-| 38 | [`38.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/38.txt) | [Everyday-VPN/Everyday-VPN](https://raw.githubusercontent.com/Everyday-VPN/Everyday-VPN/main/subscription/main.txt) | 15:58 | 17.02.2026 |
-| 39 | [`39.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/39.txt) | [Leon406/SubCrawler](https://raw.githubusercontent.com/Leon406/SubCrawler/master/sub/share/vless) | Никогда | Никогда |
-| 40 | [`40.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/40.txt) | [Leon406/SubCrawler](https://raw.githubusercontent.com/Leon406/SubCrawler/master/sub/share/all3) | Никогда | Никогда |
-| 41 | [`41.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/41.txt) | [peasoft/NoMoreWalls](https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt) | 15:58 | 17.02.2026 |
-| 42 | [`42.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/42.txt) | [peasoft/NoMoreWalls](https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list_raw.txt) | 15:58 | 17.02.2026 |
-| 43 | [`43.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/43.txt) | [aiboboxx/v2rayfree](https://raw.githubusercontent.com/aiboboxx/v2rayfree/main/v2) | Никогда | Никогда |
-| 44 | [`44.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/44.txt) | [freefq/free](https://raw.githubusercontent.com/freefq/free/master/v2) | 15:58 | 17.02.2026 |
-| 45 | [`45.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/45.txt) | [ermaozi/get_subscribe](https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt) | 15:58 | 17.02.2026 |
-| 46 | [`46.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/46.txt) | [tbbatbb/Proxy](https://raw.githubusercontent.com/tbbatbb/Proxy/master/dist/v2ray.config.txt) | Никогда | Никогда |
-| 47 | [`47.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/47.txt) | [vveg26/get_proxy](https://raw.githubusercontent.com/vveg26/get_proxy/main/proxy.yaml) | Никогда | Никогда |
-| 48 | [`48.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/48.txt) | [w1770946466/Auto_proxy](https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription1) | 15:58 | 17.02.2026 |
-| 49 | [`49.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/49.txt) | [w1770946466/Auto_proxy](https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription2) | 15:58 | 17.02.2026 |
-| 50 | [`50.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/50.txt) | [w1770946466/Auto_proxy](https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription3) | 15:58 | 17.02.2026 |
-| 51 | [`51.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/51.txt) | [Jsnzkpg/Jsnzkpg](https://raw.githubusercontent.com/Jsnzkpg/Jsnzkpg/Jsnzkpg/Jsnzkpg) | 15:58 | 17.02.2026 |
-| 52 | [`52.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/52.txt) | [ALIILAPRO/v2rayNG-Config](https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt) | 15:58 | 17.02.2026 |
-| 53 | [`53.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/53.txt) | [ts-sf/fly](https://raw.githubusercontent.com/ts-sf/fly/main/v2) | 15:58 | 17.02.2026 |
-| 54 | [`54.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/54.txt) | [bardiafiroozbakht/nodes](https://raw.githubusercontent.com/bardiafiroozbakht/nodes/main/betatnodes) | Никогда | Никогда |
-| 55 | [`55.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/55.txt) | [mfuu/v2ray](https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray.txt) | Никогда | Никогда |
-| 56 | [`56.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/56.txt) | [abshare/abshare.github.io](https://raw.githubusercontent.com/abshare/abshare.github.io/main/readme.md) | Никогда | Никогда |
-| 57 | [`57.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/57.txt) | [Barabama/FreeNodes](https://raw.githubusercontent.com/Barabama/FreeNodes/master/nodes/merged.txt) | 15:58 | 17.02.2026 |
-| 58 | [`58.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/58.txt) | [GreenFishStudio/GreenFish](https://raw.githubusercontent.com/GreenFishStudio/GreenFish/master/Subscription/GreenFishYYDS.txt) | Никогда | Никогда |
-| 59 | [`59.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/59.txt) | [ripaojiedian/freenode](https://raw.githubusercontent.com/ripaojiedian/freenode/main/sub) | 15:58 | 17.02.2026 |
-| 60 | [`60.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/60.txt) | [Pawdroid/Free-servers](https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub) | 15:58 | 17.02.2026 |
-| 61 | [`61.txt`](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/61.txt) | [Агрегат доп. источников](https://github.com/IPTVRU2026/VPNHUBRU26/raw/refs/heads/main/githubmirror/61.txt) | 15:58 | 17.02.2026 |
+| Файл | Ссылка |
+|------|--------|
+| 📱 Telegram | [telegram_proxies.txt](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/telegram_proxies.txt) |
+| 🔐 VPN | [vpn_configs.txt](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/vpn_configs.txt) |
+| 📋 Всё в одном | [all_in_one.txt](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/all_in_one.txt) |
+| 🔄 Subscription | [subscription.txt](https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/githubmirror/subscription.txt) |
+
+**Обновлено:** 17:06 | 17.02.2026
