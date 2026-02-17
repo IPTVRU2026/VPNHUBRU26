@@ -1,76 +1,19 @@
 # 🧊 ICEBREAKER ULTIMATE
 
-Автоматический агрегатор VPN и прокси-конфигов с автопоиском источников
+[![Release](https://img.shields.io/github/v/release/IPTVRU2026/VPNHUBRU26)](https://github.com/IPTVRU2026/VPNHUBRU26/releases/latest)
+[![Pages](https://img.shields.io/badge/GitHub-Pages-blue)](https://IPTVRU2026.github.io/VPNHUBRU26)
 
-## 🚀 Статус
+## 🌐 САЙТ: [https://IPTVRU2026.github.io/VPNHUBRU26](https://IPTVRU2026.github.io/VPNHUBRU26)
 
-[![Last Update](https://img.shields.io/github/last-commit/IPTVRU2026/VPNHUBRU26)](https://github.com/IPTVRU2026/VPNHUBRU26/commits)
-[![Releases](https://img.shields.io/github/v/release/IPTVRU2026/VPNHUBRU26)](https://github.com/IPTVRU2026/VPNHUBRU26/releases)
+📊 **Статистика:** 4 TG • 693 VPN
+⏱️ **Обновлено:** 17.02.2026 11:45 UTC
 
-## 📊 Последняя статистика
+📁 **Папка сайта:** `/sites` - содержит все файлы и инструкцию
 
-- **Telegram Proxies:** 404
-- **VPN Configs:** 638
-- **Последнее обновление:** 2026-02-17 09:42 UTC
+🔗 **RAW ссылки:**
+- TG: https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/telegram_proxies.txt
+- VPN: https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/vpn_configs.json
+- All-in-One: https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/all_in_one.txt
+- Subscription: https://raw.githubusercontent.com/IPTVRU2026/VPNHUBRU26/main/subscription.txt
 
-## 📦 Скачать конфиги
-
-[📥 Latest Release](https://github.com/IPTVRU2026/VPNHUBRU26/releases/latest)
-
-### Файлы в релизе:
-- `telegram_proxies.txt` - MTProto и SOCKS5 прокси для Telegram
-- `vpn_configs.json` - VPN конфигурации (VLESS, VMess, Shadowsocks, Trojan)
-- `all_in_one.txt` - Все конфиги в одном файле
-- `subscription.txt` - Subscription ссылка для автообновления
-
-## 📱 Рекомендуемые приложения
-
-### Android
-- **Nekobox** - [Скачать](https://github.com/MatsuriDayo/NekoBoxForAndroid/releases)
-- **v2rayNG** - [Скачать](https://github.com/2dust/v2rayNG/releases)
-- **HAP VPN** - Универсальное решение для всех платформ
-
-### iOS  
-- **Streisand** - [App Store](https://apps.apple.com/app/streisand/id6450534064)
-- **V2BOX** - [App Store](https://apps.apple.com/app/v2box-v2ray-client/id6446814690)
-- **HAP VPN** - [App Store](https://apps.apple.com/app/hap-vpn)
-
-### Для России
-- **RusTor Telega** - Для Telegram MTProto прокси
-- **Proxy Droid** - Для чистых SOCKS5 прокси
-
-## 🎯 Возможности
-
-✅ **Автоматический поиск источников** - Система сама находит боты и каналы
-✅ **10 стратегий сбора** - Максимальная добыча конфигов
-✅ **Проверка работоспособности** - Только рабочие конфиги
-✅ **Разделение по типам** - Telegram / VPN отдельно
-✅ **QR-коды** - Быстрое подключение
-✅ **Subscription ссылки** - Автообновление в приложениях
-
-## 📖 Как использовать
-
-### Для Telegram:
-1. Скачайте `telegram_proxies.txt`
-2. Telegram → Настройки → Данные и память → Прокси
-3. Добавьте любой прокси из файла
-
-### Для VPN:
-1. Установите приложение (Nekobox/v2rayNG/Streisand/V2BOX)
-2. Скачайте `vpn_configs.json`
-3. Импортируйте файл в приложение
-4. Подключайтесь!
-
-## ⚠️ Важно
-
-- Это бесплатные публичные прокси
-- Не используйте для критичных данных
-- Соблюдайте законы вашей страны
-- Используйте ответственно
-
-## 📜 License
-
-MIT License - свободное использование
-
----
-*Powered by ICEBREAKER ULTIMATE*
+👉 **[ПОСЛЕДНИЙ РЕЛИЗ](https://github.com/IPTVRU2026/VPNHUBRU26/releases/latest)**
